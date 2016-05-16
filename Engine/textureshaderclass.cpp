@@ -9,7 +9,7 @@ TextureShaderClass::TextureShaderClass()
 	m_vertexShader = 0;
 	m_pixelShader = 0;
 	m_layout = 0;
-	m_constantBuffer = 0;
+	m_constantBufferPs = m_constantBuffer = 0;
 	m_sampleState = 0;
 }
 
@@ -191,6 +191,21 @@ bool TextureShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR
 		return false;
 	}
 
+	// ps cbuffer
+	// Setup the description of the dynamic constant buffer that is in the pixel shader.
+	constantBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	constantBufferDesc.ByteWidth = sizeof(PsConstantBufferType);
+	constantBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	constantBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	constantBufferDesc.MiscFlags = 0;
+	constantBufferDesc.StructureByteStride = 0;
+
+	result = device->CreateBuffer(&constantBufferDesc, NULL, &m_constantBufferPs);
+	if (FAILED(result))
+	{
+		return false;
+	}
+
 	// Create a texture sampler state description.
     samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
     samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -231,6 +246,13 @@ void TextureShaderClass::ShutdownShader()
 	{
 		m_constantBuffer->Release();
 		m_constantBuffer = 0;
+	}
+
+	// Release the constant buffer.
+	if (m_constantBufferPs)
+	{
+		m_constantBufferPs->Release();
+		m_constantBufferPs = 0;
 	}
 
 	// Release the layout.
@@ -299,7 +321,9 @@ bool TextureShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext,
 {
 	HRESULT result;
     D3D11_MAPPED_SUBRESOURCE mappedResource;
+	D3D11_MAPPED_SUBRESOURCE mappedResourcePs;
 	ConstantBufferType* dataPtr;
+	PsConstantBufferType* psdataPtr;
 	unsigned int bufferNumber;
 
 
@@ -310,8 +334,10 @@ bool TextureShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext,
 		return false;
 	}
 
+
 	// Get a pointer to the data in the constant buffer.
 	dataPtr = (ConstantBufferType*)mappedResource.pData;
+
 
 	// Transpose the matrices to prepare them for the shader.
 	D3DXMatrixTranspose(&worldMatrix, &worldMatrix);
@@ -326,11 +352,19 @@ bool TextureShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext,
 	// Unlock the constant buffer.
     deviceContext->Unmap(m_constantBuffer, 0);
 
+
 	// Set the position of the constant buffer in the vertex shader.
 	bufferNumber = 0;
 
 	// Now set the constant buffer in the vertex shader with the updated values.
     deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_constantBuffer);
+
+	bufferNumber++;
+	result = deviceContext->Map(m_constantBufferPs, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResourcePs);
+	psdataPtr = (PsConstantBufferType*)mappedResourcePs.pData;
+	psdataPtr->dir = D3DXVECTOR4(1, 0, 0, 0); // 10horisontal \ 01vertical blur
+	deviceContext->Unmap(m_constantBufferPs, 0);
+	deviceContext->PSSetConstantBuffers(bufferNumber, 1, &m_constantBufferPs);
 
 	// Set shader texture resource in the pixel shader.
 	deviceContext->PSSetShaderResources(0, 1, &texture);

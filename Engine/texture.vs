@@ -6,7 +6,7 @@
 /////////////
 // GLOBALS //
 /////////////
-cbuffer PerFrameBuffer
+cbuffer PerFrameBuffer : register(b0)
 {
 	matrix worldMatrix;
 	matrix viewMatrix;
