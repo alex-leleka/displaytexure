@@ -24,6 +24,7 @@ const float SCREEN_DEPTH = 1000.0f;
 const float SCREEN_NEAR = 0.1f;
 class RenderTextureClass;
 class TextureShaderClass;
+class DisplayTexture;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Class name: GraphicsClass
@@ -56,6 +57,7 @@ private:
 	LightClass* m_Light;
 	RenderTextureClass* m_RenderTexture;
 	TextureShaderClass* m_TextureShader;
+	DisplayTexture* m_DisplayTexture;
 };
 
 #endif
