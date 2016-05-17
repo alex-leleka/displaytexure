@@ -44,25 +44,18 @@ enum {
 //=============================================================================
 int WINAPI WinMain(HINSTANCE hInst,HINSTANCE,LPSTR pStr,int nCmd)
 {
-	ustring classname=_T("SIMPLEWND");
+	ustring classname=_T("MAINWINDOW");
 	WNDCLASSEX wcx={0};  //used for storing information about the wnd 'class'
 
 	wcx.cbSize         = sizeof(WNDCLASSEX);           
-	wcx.lpfnWndProc    = WndProc;             //wnd Procedure pointer
-	wcx.hInstance      = hInst;               //app instance
-	//use 'LoadImage' to load wnd class icon and cursor as it supersedes the 
-	//obsolete functions 'LoadIcon' and 'LoadCursor', although these functions will 
-	//still work. Because the icon and cursor are loaded from system resources ie 
-	//they are shared, it is not necessary to free the image resources with either 
-	//'DestroyIcon' or 'DestroyCursor'.
+	wcx.lpfnWndProc    = WndProc;
+	wcx.hInstance      = hInst;
 	wcx.hIcon         = reinterpret_cast<HICON>(LoadImage(0,IDI_APPLICATION,
 		IMAGE_ICON,0,0,LR_SHARED));
 	wcx.hCursor       = reinterpret_cast<HCURSOR>(LoadImage(0,IDC_ARROW,
 		IMAGE_CURSOR,0,0,LR_SHARED));
 	wcx.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_BTNFACE+1);   
 	wcx.lpszClassName = classname.c_str(); 
-	//the window 'class' (not c++ class) has to be registered with the system
-	//before windows of that 'class' can be created
 	if (!RegisterClassEx(&wcx))
 	{
 		ErrMsg(_T("Failed to register wnd class"));
@@ -72,14 +65,17 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE,LPSTR pStr,int nCmd)
 	int desktopwidth=GetSystemMetrics(SM_CXSCREEN);
 	int desktopheight=GetSystemMetrics(SM_CYSCREEN);
 
+	int wndPosX = 100, wndPosY = 100; // top left corner
+	int wndWidth = 300, wndHeight = 400;
+
 	HWND hwnd=CreateWindowEx(0,                     //extended styles
 		classname.c_str(),     //name: wnd 'class'
-		_T("Button Controls"), //wnd title
-		WS_OVERLAPPEDWINDOW,   //wnd style
-		desktopwidth/4,        //position:left
-		desktopheight/4,       //position: top
-		desktopwidth/2,        //width
-		desktopheight/2,       //height
+		_T("DemoMain"), //wnd title
+		WS_OVERLAPPEDWINDOW|WS_CLIPCHILDREN|WS_CLIPSIBLINGS,   //wnd style
+		wndPosX,
+		wndPosY,
+		wndWidth,
+		wndHeight,
 		0,                     //parent wnd handle
 		0,                     //menu handle/wnd id
 		hInst,                 //app instance
@@ -92,11 +88,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE,LPSTR pStr,int nCmd)
 
 	ShowWindow(hwnd,nCmd); 
 	UpdateWindow(hwnd);
-	//start message loop - windows applications are 'event driven' waiting on user,
-	//application or system signals to determine what action, if any, to take. Note 
-	//that an error may cause GetMessage to return a negative value so, ideally,  
-	//this result should be tested for and appropriate action taken to deal with 
-	//it(the approach taken here is to simply quit the application).
+	//start message loop
 	MSG msg;
 	while (GetMessage(&msg,0,0,0)>0)
 	{
@@ -125,12 +117,11 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 		{
 			 WinMain1(0, 0,0,0);
 		}
-		break;
+		return 0;
 	default:
 		//let system deal with msg
 		return DefWindowProc(hwnd,uMsg,wParam,lParam);  
 	}
-	return 0;
 }
 //=============================================================================
 int OnCreate(const HWND hwnd,CREATESTRUCT *cs)
