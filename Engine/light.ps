@@ -46,7 +46,7 @@ float4 LightPixelShader(PixelInputType input) : SV_TARGET
     lightDir = -lightDirection;
 
     // Calculate the amount of light on this pixel.
-    lightIntensity = saturate(dot(input.normal, lightDir));
+    lightIntensity = saturate(dot(input.normal, lightDir)); //saturate(NdotL)
 
     // Determine the final amount of diffuse color based on the diffuse color combined with the light intensity.
     color = saturate(diffuseColor * lightIntensity);
