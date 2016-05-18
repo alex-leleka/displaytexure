@@ -14,6 +14,8 @@
 #include "lightshaderclass.h"
 #include "lightclass.h"
 
+#include <functional>
+
 
 /////////////
 // GLOBALS //
@@ -46,8 +48,9 @@ public:
 	bool Frame();
 private:
 	bool Render(float);
-	bool RenderToTexture();
+	bool RenderToTexture(RenderTextureClass *, std::function<bool()> render );
 	bool RenderScene(float rotation);
+	void SetBackBufferRT();
 
 private:
 	D3DClass* m_D3D;
@@ -56,6 +59,7 @@ private:
 	LightShaderClass* m_LightShader;
 	LightClass* m_Light;
 	RenderTextureClass* m_RenderTexture;
+	RenderTextureClass* m_RenderTexture2;
 	TextureShaderClass* m_TextureShader;
 	DisplayTexture* m_DisplayTexture;
 };

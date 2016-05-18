@@ -11,6 +11,7 @@ GraphicsClass::GraphicsClass() : m_TextureShader(0), m_DisplayTexture(0)
 	m_D3D = 0;
 	m_Camera = 0;
 	m_RenderTexture = 0;
+	m_RenderTexture2 = 0;
 	m_Model = 0;
 	m_LightShader = 0;
 	m_Light = 0;
@@ -83,6 +84,20 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 
 	// Initialize the render to texture object.
 	result = m_RenderTexture->Initialize(m_D3D->GetDevice(), screenWidth, screenHeight);
+	if (!result)
+	{
+		return false;
+	}
+
+
+	m_RenderTexture2 = new RenderTextureClass;
+	if (!m_RenderTexture2)
+	{
+		return false;
+	}
+
+	// Initialize the render to texture object.
+	result = m_RenderTexture2->Initialize(m_D3D->GetDevice(), screenWidth, screenHeight);
 	if (!result)
 	{
 		return false;
@@ -167,6 +182,13 @@ void GraphicsClass::Shutdown()
 		m_RenderTexture = 0;
 	}
 
+	if (m_RenderTexture2)
+	{
+		m_RenderTexture2->Shutdown();
+		delete m_RenderTexture2;
+		m_RenderTexture2 = 0;
+	}
+
 	// Release the light object.
 	if(m_Light)
 	{
@@ -247,10 +269,6 @@ bool GraphicsClass::RenderScene(float rotation)
 	m_D3D->GetWorldMatrix(worldMatrix);
 	m_D3D->GetProjectionMatrix(projectionMatrix);
 
-	// Rotate the world matrix by the rotation value so that the triangle will spin.
-
-	D3DXMatrixRotationY(&worldMatrix, rotation);
-
 	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
 
 	m_Model->Render(m_D3D->GetDeviceContext());
@@ -273,48 +291,67 @@ bool GraphicsClass::Render(float rotation)
 	m_D3D->GetOrthoMatrix(orthoMatrix);
 
 	// Render the entire scene to the texture first.
-	bool bresult = RenderToTexture();
+	bool bresult = RenderToTexture(m_RenderTexture, [this](){return RenderScene(0);});
 	if (!bresult)
 	{
 		return false;
 	}
 
-	bresult = m_DisplayTexture->Render(m_D3D->GetDeviceContext(), worldMatrix, viewMatrix,
-		projectionMatrix, orthoMatrix, m_TextureShader, m_RenderTexture);
+	// apply blur in two steps
+	// Horizontal blur
+	bresult = RenderToTexture(m_RenderTexture2, [&,this](){return m_DisplayTexture->Render(m_D3D->GetDeviceContext(), worldMatrix, viewMatrix,
+		projectionMatrix, orthoMatrix, m_TextureShader, m_RenderTexture, true);});
 	if (!bresult)
 	{
 		return false;
 	}
+	// Vertical blur
+	bresult = RenderToTexture(m_RenderTexture, [&,this](){return m_DisplayTexture->Render(m_D3D->GetDeviceContext(), worldMatrix, viewMatrix,
+		projectionMatrix, orthoMatrix, m_TextureShader, m_RenderTexture2, false);});
+	if (!bresult)
+	{
+		return false;
+	}
+	bresult = RenderToTexture(m_RenderTexture2, [&,this](){return m_DisplayTexture->Render(m_D3D->GetDeviceContext(), worldMatrix, viewMatrix,
+		projectionMatrix, orthoMatrix, m_TextureShader, m_RenderTexture, false);});
+
+	SetBackBufferRT();
+	m_D3D->BeginScene(0.0f, 1.0f, 0.0f, 1.0f);
+	m_DisplayTexture->Render(m_D3D->GetDeviceContext(), worldMatrix, viewMatrix,
+		projectionMatrix, orthoMatrix, m_TextureShader, m_RenderTexture, true);
 	// Generate the view matrix based on the camera's position.
 	//if (!RenderScene(rotation)) 
 	//	return false;
-
+	//RenderScene(0);
 	// Present the rendered scene to the screen.
 	m_D3D->EndScene();
 
 	return true;
 }
 
-bool GraphicsClass::RenderToTexture()
+void GraphicsClass::SetBackBufferRT()
+{
+	// Reset the render target back to the original back buffer and not the render to texture anymore.
+	m_D3D->SetBackBufferRenderTarget();
+}
+
+bool GraphicsClass::RenderToTexture(RenderTextureClass * pRenderTexture, std::function<bool()> render)
 {
 	bool result;
 
 
 	// Set the render target to be the render to texture.
-	m_RenderTexture->SetRenderTarget(m_D3D->GetDeviceContext(), m_D3D->GetDepthStencilView());
+	pRenderTexture->SetRenderTarget(m_D3D->GetDeviceContext(), m_D3D->GetDepthStencilView());
 
 	// Clear the render to texture.
-	m_RenderTexture->ClearRenderTarget(m_D3D->GetDeviceContext(), m_D3D->GetDepthStencilView(), 0.0f, 0.0f, 1.0f, 1.0f);
+	pRenderTexture->ClearRenderTarget(m_D3D->GetDeviceContext(), m_D3D->GetDepthStencilView(), 0.0f, 0.0f, 1.0f, 1.0f);
 
 	// Render the scene now and it will draw to the render to texture instead of the back buffer.
-	result = RenderScene(0);
+	result = render();//RenderScene(0);
 	if (!result)
 	{
 		return false;
 	}
-
-	// Reset the render target back to the original back buffer and not the render to texture anymore.
-	m_D3D->SetBackBufferRenderTarget();
 
 	return true;
 }

@@ -3,6 +3,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "textureshaderclass.h"
 #include <D3DCompiler.h>
+#include <fstream>
 
 TextureShaderClass::TextureShaderClass()
 {
@@ -50,13 +51,13 @@ void TextureShaderClass::Shutdown()
 
 
 bool TextureShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
-								D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
+								D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, bool bBlurDirH)
 {
 	bool result;
 
 
 	// Set the shader parameters that it will use for rendering.
-	result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, texture);
+	result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, texture, bBlurDirH);
 	if(!result)
 	{
 		return false;
@@ -286,7 +287,7 @@ void TextureShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND
 {
 	char* compileErrors;
 	unsigned long bufferSize, i;
-	ofstream fout;
+	std::ofstream fout;
 
 
 	// Get a pointer to the error message text buffer.
@@ -319,7 +320,7 @@ void TextureShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND
 
 
 bool TextureShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
-											 D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
+											 D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, bool blurDirH)
 {
 	HRESULT result;
     D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -364,7 +365,10 @@ bool TextureShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext,
 	bufferNumber++;
 	result = deviceContext->Map(m_constantBufferPs, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResourcePs);
 	psdataPtr = (PsConstantBufferType*)mappedResourcePs.pData;
-	psdataPtr->dir = D3DXVECTOR4(1, 0, 0, 0); // 10horisontal \ 01vertical blur
+	if (blurDirH)
+		psdataPtr->dir = D3DXVECTOR4(1, 0, 0, 0); // 10horisontal \ 01vertical blur
+	else
+		psdataPtr->dir = D3DXVECTOR4(0, 1, 0, 0);
 	deviceContext->Unmap(m_constantBufferPs, 0);
 	deviceContext->PSSetConstantBuffers(bufferNumber, 1, &m_constantBufferPs);
 
