@@ -17,7 +17,7 @@
 class CameraClass
 {
 public:
-	CameraClass();
+	CameraClass(const D3DXVECTOR3 & up = D3DXVECTOR3(0, 1, 0));
 	CameraClass(const CameraClass&);
 	~CameraClass();
 
@@ -34,6 +34,7 @@ private:
 	float m_positionX, m_positionY, m_positionZ;
 	float m_rotationX, m_rotationY, m_rotationZ;
 	D3DXMATRIX m_viewMatrix;
+	D3DXVECTOR3 m_up;
 };
 
 #endif

@@ -54,7 +54,8 @@ private:
 
 private:
 	D3DClass* m_D3D;
-	CameraClass* m_Camera;
+	CameraClass* m_worldCamera;
+	CameraClass* m_texViewCamera;
 	ModelClass* m_Model;
 	LightShaderClass* m_LightShader;
 	LightClass* m_Light;

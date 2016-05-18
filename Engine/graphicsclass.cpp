@@ -6,10 +6,11 @@
 #include "textureshaderclass.h"
 #include "DisplayTexture.h"
 
-GraphicsClass::GraphicsClass() : m_TextureShader(0), m_DisplayTexture(0)
+
+GraphicsClass::GraphicsClass() : m_TextureShader(0), m_DisplayTexture(0), m_texViewCamera(0)
 {
 	m_D3D = 0;
-	m_Camera = 0;
+	m_worldCamera = 0;
 	m_RenderTexture = 0;
 	m_RenderTexture2 = 0;
 	m_Model = 0;
@@ -49,14 +50,21 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	}
 
 	// Create the camera object.
-	m_Camera = new CameraClass;
-	if(!m_Camera)
+	m_worldCamera = new CameraClass;
+	if(!m_worldCamera)
+	{
+		return false;
+	}
+
+	m_texViewCamera = new CameraClass(D3DXVECTOR3(0, -1, 0)); // when you looking at screen "up" is opposite to Y axis
+	if(!m_texViewCamera)
 	{
 		return false;
 	}
 
 	// Set the initial position of the camera.
-	m_Camera->SetPosition(0.0f, 0.0f, 3.0f);
+	m_worldCamera->SetPosition(0.0f, 0.0f, 3.0f);
+	m_texViewCamera->SetPosition(0.0f, 0.0f, 3.0f);
 
 	
 	// Create the model object.
@@ -213,10 +221,10 @@ void GraphicsClass::Shutdown()
 	}
 
 	// Release the camera object.
-	if(m_Camera)
+	if(m_worldCamera)
 	{
-		delete m_Camera;
-		m_Camera = 0;
+		delete m_worldCamera;
+		m_worldCamera = 0;
 	}
 
 	// Release the D3D object.
@@ -261,11 +269,11 @@ bool GraphicsClass::RenderScene(float rotation)
 	D3DXMATRIX viewMatrix;
 	D3DXMATRIX projectionMatrix;
 	bool result;
-	m_Camera->Render();
+	m_worldCamera->Render();
 
 	// Get the world, view, and projection matrices from the camera and d3d objects.
 
-	m_Camera->GetViewMatrix(viewMatrix);
+	m_worldCamera->GetViewMatrix(viewMatrix);
 	m_D3D->GetWorldMatrix(worldMatrix);
 	m_D3D->GetProjectionMatrix(projectionMatrix);
 
@@ -283,19 +291,20 @@ bool GraphicsClass::RenderScene(float rotation)
 
 bool GraphicsClass::Render(float rotation)
 {
-	D3DXMATRIX worldMatrix, viewMatrix, projectionMatrix, orthoMatrix;
-
-	m_D3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
-	m_Camera->GetViewMatrix(viewMatrix);
-	m_D3D->GetWorldMatrix(worldMatrix);
-	m_D3D->GetOrthoMatrix(orthoMatrix);
-
 	// Render the entire scene to the texture first.
 	bool bresult = RenderToTexture(m_RenderTexture, [this](){return RenderScene(0);});
 	if (!bresult)
 	{
 		return false;
 	}
+	D3DXMATRIX worldMatrix, viewMatrix, projectionMatrix, orthoMatrix;
+
+	m_D3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+	m_texViewCamera->Render();
+	m_texViewCamera->GetViewMatrix(viewMatrix);
+	m_D3D->GetWorldMatrix(worldMatrix);
+	m_D3D->GetOrthoMatrix(orthoMatrix);
+	m_D3D->GetProjectionMatrix(projectionMatrix);
 
 	// apply blur in two steps
 	// Horizontal blur
@@ -312,8 +321,8 @@ bool GraphicsClass::Render(float rotation)
 	{
 		return false;
 	}
-	bresult = RenderToTexture(m_RenderTexture2, [&,this](){return m_DisplayTexture->Render(m_D3D->GetDeviceContext(), worldMatrix, viewMatrix,
-		projectionMatrix, orthoMatrix, m_TextureShader, m_RenderTexture, false);});
+	//bresult = RenderToTexture(m_RenderTexture2, [&,this](){return m_DisplayTexture->Render(m_D3D->GetDeviceContext(), worldMatrix, viewMatrix,
+	//	projectionMatrix, orthoMatrix, m_TextureShader, m_RenderTexture, false);});
 
 	SetBackBufferRT();
 	m_D3D->BeginScene(0.0f, 1.0f, 0.0f, 1.0f);
