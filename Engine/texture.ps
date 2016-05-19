@@ -3,7 +3,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 cbuffer PerFrameBufferPs : register(b1)
 {
-	float4 dir;
+	float4 dirAndTexSize; // xy (direction) zw (texture size)
 };
 
 /////////////
@@ -27,10 +27,23 @@ static const float weight[] = {
   0.0540540541, 0.0162162162
 };
 
-float pattern(float2 pos)
+float patternOnliTheRightScreenSide(float2 pos)
 {
 	float xbound = 0.5;
 	if (pos.x < xbound)
+		return 0.0;
+	return 1.0;
+}
+
+float patternEllipse(float2 pos)
+{
+	float dplusR = 0.5;
+	float R = 0.15;
+	float Rsq = R * R;
+	float shift_d = dplusR - R; 
+	// denormalize x and y to get circle
+	float v = (pos.x - dplusR)*(pos.x - dplusR) + (pos.y - dplusR)*(pos.y - dplusR);
+	if (v  > Rsq)
 		return 0.0;
 	return 1.0;
 }
@@ -39,7 +52,7 @@ float pattern(float2 pos)
 ////////////////////////////////////////////////////////////////////////////////
 float4 TexturePixelShader(PixelInputType input) : SV_TARGET
 {
-	if (pattern(input.tex) == 0.0)
+	if (patternEllipse(input.tex) == 0.0)
 		return shaderTexture.Sample(SampleType, input.tex);
 	float4 ppColour = shaderTexture.Sample(SampleType, input.tex) * weight[0];
 	float3 FragmentColor = float3(0.0f, 0.0f, 0.0f);
@@ -48,10 +61,10 @@ float4 TexturePixelShader(PixelInputType input) : SV_TARGET
 	//(0.0, 1.0) -> vertical blur
 
 
-	float2 scr_size = float2(800, 600);
+	float2 scr_size = dirAndTexSize.zw;
 
-	float hstep = dir.x / scr_size.x;
-	float vstep = dir.y / scr_size.y;
+	float hstep = dirAndTexSize.x / scr_size.x;
+	float vstep = dirAndTexSize.y / scr_size.y;
 
 	for (int i = 1; i < 5; i++) {
 	FragmentColor = FragmentColor +
@@ -60,6 +73,7 @@ float4 TexturePixelShader(PixelInputType input) : SV_TARGET
 	}
 	ppColour = ppColour + float4(FragmentColor,0.0f);
 	float4 color = ppColour;
+	//return float4(1,0,0,1);
 	return color;
 
 }

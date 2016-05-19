@@ -1,6 +1,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Filename: lightshaderclass.h
 ////////////////////////////////////////////////////////////////////////////////
+// code based on rastertek tutirial 7
+// http://www.rastertek.com/dx11tut07.html
+// 
+/*
+	displaytexure demo https://github.com/alex-leleka/displaytexure 
+	alex leleka (c) 2016
+*/
 #ifndef _LIGHTSHADERCLASS_H_
 #define _LIGHTSHADERCLASS_H_
 

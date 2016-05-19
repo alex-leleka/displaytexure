@@ -1,6 +1,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Filename: textureshaderclass.cpp
 ////////////////////////////////////////////////////////////////////////////////
+// code based on rastertek tutirial 7
+// http://www.rastertek.com/dx11tut07.html
+// 
+/*
+	displaytexure demo https://github.com/alex-leleka/displaytexure 
+	alex leleka (c) 2016
+*/
 #include "textureshaderclass.h"
 #include <D3DCompiler.h>
 #include <fstream>
@@ -363,12 +370,13 @@ bool TextureShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext,
     deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_constantBuffer);
 
 	bufferNumber++;
+	D3DXVECTOR2 vTextureSize(800.0, 600.0);
 	result = deviceContext->Map(m_constantBufferPs, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResourcePs);
 	psdataPtr = (PsConstantBufferType*)mappedResourcePs.pData;
 	if (blurDirH)
-		psdataPtr->dir = D3DXVECTOR4(1, 0, 0, 0); // 10horisontal \ 01vertical blur
+		psdataPtr->dir = D3DXVECTOR4(1, 0, vTextureSize.x, vTextureSize.y); // 10horisontal \ 01vertical blur
 	else
-		psdataPtr->dir = D3DXVECTOR4(0, 1, 0, 0);
+		psdataPtr->dir = D3DXVECTOR4(0, 1, vTextureSize.x, vTextureSize.y);
 	deviceContext->Unmap(m_constantBufferPs, 0);
 	deviceContext->PSSetConstantBuffers(bufferNumber, 1, &m_constantBufferPs);
 

@@ -1,3 +1,9 @@
+// Tiny Renderer, https://github.com/ssloy/tinyrenderer
+// Copyright Dmitry V. Sokolov
+/*
+	displaytexure demo https://github.com/alex-leleka/displaytexure 
+	alex leleka (c) 2016
+*/
 #ifndef __MODEL_H__
 #define __MODEL_H__
 

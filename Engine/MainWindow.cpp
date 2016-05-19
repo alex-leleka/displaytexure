@@ -11,6 +11,10 @@
 //conjunction with other button styles to create image checkboxes, radio 
 //buttons etc. The default is a push button.
 //=============================================================================
+/*
+	displaytexure demo https://github.com/alex-leleka/displaytexure 
+	alex leleka (c) 2016
+*/
 #if defined _MSC_VER || defined __BORLANDC__
 #define OEMRESOURCE
 #endif
