@@ -41,7 +41,7 @@ inline int ErrMsg(const ustring&);
 //control ids
 enum {
 	IDBC_PUSHBUTTON_APPLY_OPTIONS=200,
-	IDBC_PUSHBUTTON_SHOW_RENDWINDOW,
+	IDBC_PUSHBUTTON_SHOW_VIEWPORT,
 	IDCC_DROPDOWNLIST_MODELS,
 	IDBC_AUTORADIOBUTTON1NOBLUR,
 	IDBC_AUTORADIOBUTTON1BLURRIGHTSIDE,
@@ -104,6 +104,27 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE,LPSTR pStr,int nCmd)
 	return static_cast<int>(msg.wParam);
 }
 
+int GetBlurPatternIndex(HWND hwnd)
+{
+	int nBlurPattern = 0;
+	if (IsDlgButtonChecked(hwnd, IDBC_AUTORADIOBUTTON1NOBLUR))
+		nBlurPattern = 0;
+	if (IsDlgButtonChecked(hwnd, IDBC_AUTORADIOBUTTON1BLURRIGHTSIDE))
+		nBlurPattern = 1;
+	if (IsDlgButtonChecked(hwnd, IDBC_AUTORADIOBUTTON1BLURTHEELLIPSE))
+		nBlurPattern = 2;
+	return nBlurPattern;
+}
+
+int GetLightingModelIndex(HWND hwnd)
+{
+	HWND hwndComboBox = GetDlgItem(hwnd, IDCC_DROPDOWNLIST_MODELS); 
+	LRESULT item = SendMessage(hwndComboBox, CB_GETCURSEL, 0, 0); // index of the selected item in combo box
+	if (item == CB_ERR)
+		return 0;
+	return item;
+}
+
 //=============================================================================
 LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 {
@@ -119,26 +140,28 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 	case WM_COMMAND:
 		if(wParam == IDBC_PUSHBUTTON_APPLY_OPTIONS)
 		{
-			 
-			 HWND hwndComboBox = GetDlgItem(hwnd, IDCC_DROPDOWNLIST_MODELS); 
-			 LRESULT item = SendMessage(hwndComboBox, CB_GETCURSEL, 0, 0); // number of the selected item in combo box
-			 if (item != CB_ERR)
-			 {
-				 // set lighting model
-				 if (callbacks[eCB_LightingModel])
-					 callbacks[eCB_LightingModel](item);
-			 }
+			if (callbacks[eCB_LightingModel])
+				callbacks[eCB_LightingModel](GetLightingModelIndex(hwnd));
 
-		} else if (wParam == IDBC_PUSHBUTTON_SHOW_RENDWINDOW)
+			if (callbacks[eCB_BlurPattern])
+				callbacks[eCB_BlurPattern](GetBlurPatternIndex(hwnd));
+
+		} else if (wParam == IDBC_PUSHBUTTON_SHOW_VIEWPORT)
 		{
 			RunEngine(callbacks);
 		} else if (LOWORD(wParam) == IDCC_DROPDOWNLIST_MODELS)
 		{
 			if(HIWORD(wParam)==CBN_SELCHANGE)
 			{
-				MessageBox(NULL, L"CBN_SELCHANGE", L"MessageBox Title", 0); // lParam - handle of the control
+				if (callbacks[eCB_LightingModel])
+					callbacks[eCB_LightingModel](GetLightingModelIndex(hwnd));
 			}
-		}  
+		} else if (LOWORD(wParam) == IDBC_AUTORADIOBUTTON1NOBLUR || 
+			LOWORD(wParam) == IDBC_AUTORADIOBUTTON1BLURRIGHTSIDE || LOWORD(wParam) == IDBC_AUTORADIOBUTTON1BLURTHEELLIPSE)
+		{
+			if (callbacks[eCB_BlurPattern])
+				callbacks[eCB_BlurPattern](GetBlurPatternIndex(hwnd));
+		}
 	default:
 		//let system deal with msg
 		return DefWindowProc(hwnd,uMsg,wParam,lParam);  
@@ -149,14 +172,14 @@ int OnCreate(const HWND hwnd,CREATESTRUCT *cs)
 {
 	//handles the WM_CREATE message of the main, parent window; return -1 to fail
 	//window creation
-	RECT rc={10,10,200,40};
+	RECT rc={10,10,210,40};
 
-	CreateControl(hwnd,cs->hInstance,BS_PUSHBUTTON,rc,IDBC_PUSHBUTTON_APPLY_OPTIONS,
-		_T("Apply options"), _T("button"));
+	CreateControl(hwnd,cs->hInstance,BS_PUSHBUTTON,rc,IDBC_PUSHBUTTON_SHOW_VIEWPORT,
+		_T("Show viewport"), _T("button"));
 
 	rc.top+=50;
-	CreateControl(hwnd,cs->hInstance,BS_PUSHBUTTON,rc,IDBC_PUSHBUTTON_SHOW_RENDWINDOW,
-		_T("PUSH BUTTON2"), _T("button"));
+	CreateControl(hwnd,cs->hInstance,BS_PUSHBUTTON,rc,IDBC_PUSHBUTTON_APPLY_OPTIONS,
+		_T("Apply options"), _T("button"));
 
 	rc.top+=50;
 	rc.bottom = 100;
