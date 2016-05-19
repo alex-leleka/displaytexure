@@ -4,18 +4,19 @@
 // code based on rastertek tutirial 7
 // http://www.rastertek.com/dx11tut07.html
 // 
-/*
-	displaytexure demo https://github.com/alex-leleka/displaytexure 
-	alex leleka (c) 2016
-*/
+///////////////////////////////////////////////////////////////////////////////////
+//	    Displaytexure demo https://github.com/alex-leleka/displaytexure          //
+//																				 //
+//      Alex Leleka (c) 2016                                                     //
+///////////////////////////////////////////////////////////////////////////////////
 #include "lightshaderclass.h"
 #include <D3DCompiler.h>
 
 LightShaderClass::LightShaderClass() : 
 	m_shadingModelIndex(0)
 {
-	m_vertexShader = 0;
-	m_pixelShader = 0;
+	m_vertexShader = nullptr;
+	m_pixelShader = nullptr;
 	m_layout = 0;
 	m_sampleState = 0;
 	m_matrixBuffer = 0;

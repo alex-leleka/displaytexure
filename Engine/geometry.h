@@ -1,9 +1,10 @@
 // Tiny Renderer, https://github.com/ssloy/tinyrenderer
 // Copyright Dmitry V. Sokolov
-/*
-	displaytexure demo https://github.com/alex-leleka/displaytexure 
-	alex leleka (c) 2016
-*/
+///////////////////////////////////////////////////////////////////////////////////
+//	    Displaytexure demo https://github.com/alex-leleka/displaytexure          //
+//																				 //
+//      Alex Leleka (c) 2016                                                     //
+///////////////////////////////////////////////////////////////////////////////////
 #ifndef __GEOMETRY_H__
 #define __GEOMETRY_H__
 

@@ -4,15 +4,18 @@
 // code based on rastertek tutirial 7
 // http://www.rastertek.com/dx11tut07.html
 // 
-/*
-	displaytexure demo https://github.com/alex-leleka/displaytexure 
-	alex leleka (c) 2016
-*/
+///////////////////////////////////////////////////////////////////////////////////
+//	    Displaytexure demo https://github.com/alex-leleka/displaytexure          //
+//																				 //
+//      Alex Leleka (c) 2016                                                     //
+///////////////////////////////////////////////////////////////////////////////////
 #include "textureshaderclass.h"
+#include "DisplayTexture.h"
+
 #include <D3DCompiler.h>
 #include <fstream>
 
-TextureShaderClass::TextureShaderClass(): m_nBlurPatternIndex(0)
+TextureShaderClass::TextureShaderClass() : m_nBlurPatternIndex(0), m_nBlurDirHV(0)
 {
 	m_vertexShader = 0;
 	m_pixelShader = 0;
@@ -57,14 +60,13 @@ void TextureShaderClass::Shutdown()
 }
 
 
-bool TextureShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
-								D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, bool bBlurDirH)
+bool TextureShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
 {
 	bool result;
 
 
 	// Set the shader parameters that it will use for rendering.
-	result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, texture, bBlurDirH);
+	result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, texture);
 	if(!result)
 	{
 		return false;
@@ -326,8 +328,7 @@ void TextureShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND
 }
 
 
-bool TextureShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
-											 D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, bool blurDirH)
+bool TextureShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
 {
 	HRESULT result;
     D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -373,11 +374,19 @@ bool TextureShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext,
 	D3DXVECTOR2 vTextureSize(800.0, 600.0);
 	result = deviceContext->Map(m_constantBufferPs, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResourcePs);
 	psdataPtr = (PsConstantBufferType*)mappedResourcePs.pData;
-	if (blurDirH)
-		psdataPtr->dir = D3DXVECTOR4(1, 0, vTextureSize.x, vTextureSize.y); // 10horisontal \ 01vertical blur
-	else
-		psdataPtr->dir = D3DXVECTOR4(0, 1, vTextureSize.x, vTextureSize.y);
+
 	psdataPtr->nBlurPatternIndex = m_nBlurPatternIndex;
+
+	if (m_nBlurDirHV == DisplayTexture::EBlurDir_noBlur)
+	{
+		psdataPtr->dir = D3DXVECTOR4(0, 0, 0, 0);
+		psdataPtr->nBlurPatternIndex = 0;
+	}
+	else if (m_nBlurDirHV == DisplayTexture::EBlurDir_H)
+		psdataPtr->dir = D3DXVECTOR4(1, 0, vTextureSize.x, vTextureSize.y); // 10horisontal blur
+	else if (m_nBlurDirHV == DisplayTexture::EBlurDir_V)
+		psdataPtr->dir = D3DXVECTOR4(0, 1, vTextureSize.x, vTextureSize.y); // 01vertical blur
+
 	deviceContext->Unmap(m_constantBufferPs, 0);
 	deviceContext->PSSetConstantBuffers(bufferNumber, 1, &m_constantBufferPs);
 
@@ -407,4 +416,9 @@ void TextureShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int in
 void TextureShaderClass::SetBlurPatternIndex(size_t index)
 {
 	m_nBlurPatternIndex = index;
+}
+
+void TextureShaderClass::SetBlurDirection(int nBlurDirHV)
+{
+	m_nBlurDirHV = nBlurDirHV;
 }

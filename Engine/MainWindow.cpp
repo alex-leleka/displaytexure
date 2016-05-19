@@ -11,13 +11,11 @@
 //conjunction with other button styles to create image checkboxes, radio 
 //buttons etc. The default is a push button.
 //=============================================================================
-/*
-	displaytexure demo https://github.com/alex-leleka/displaytexure 
-	alex leleka (c) 2016
-*/
-#if defined _MSC_VER || defined __BORLANDC__
-#define OEMRESOURCE
-#endif
+///////////////////////////////////////////////////////////////////////////////////
+//	    Displaytexure demo https://github.com/alex-leleka/displaytexure          //
+//																				 //
+//      Alex Leleka (c) 2016                                                     //
+///////////////////////////////////////////////////////////////////////////////////
 
 #include <windows.h>  //include all the basics
 #include <tchar.h>    //string and other mapping macros
@@ -170,8 +168,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 //=============================================================================
 int OnCreate(const HWND hwnd,CREATESTRUCT *cs)
 {
-	//handles the WM_CREATE message of the main, parent window; return -1 to fail
-	//window creation
+	// add controls to the window
 	RECT rc={10,10,210,40};
 
 	CreateControl(hwnd,cs->hInstance,BS_PUSHBUTTON,rc,IDBC_PUSHBUTTON_SHOW_VIEWPORT,

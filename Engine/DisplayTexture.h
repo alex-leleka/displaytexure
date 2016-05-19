@@ -23,8 +23,14 @@ class DisplayTexture
 
 	DisplayTexture(const DisplayTexture &){};
 public:
+	enum EBlurDir
+	{
+		EBlurDir_noBlur,
+		EBlurDir_H,
+		EBlurDir_V,
+	};
 	DisplayTexture();
-	bool Render(ID3D11DeviceContext* param1, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, D3DXMATRIX orthoMatrix, TextureShaderClass* pTextureShader, RenderTextureClass* pRenderTexture, bool bBlurDirH);
+	bool Render(ID3D11DeviceContext* param1, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, D3DXMATRIX orthoMatrix, TextureShaderClass* pTextureShader, RenderTextureClass* pRenderTexture, int nBlurDirHV);
 	void Shutdown();
 	bool Initialize(ID3D11Device* param1, HWND hwnd);
 

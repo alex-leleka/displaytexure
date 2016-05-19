@@ -4,10 +4,11 @@
 // code based on rastertek tutirial 7
 // http://www.rastertek.com/dx11tut07.html
 // 
-/*
-	displaytexure demo https://github.com/alex-leleka/displaytexure 
-	alex leleka (c) 2016
-*/
+///////////////////////////////////////////////////////////////////////////////////
+//	    Displaytexure demo https://github.com/alex-leleka/displaytexure          //
+//																				 //
+//      Alex Leleka (c) 2016                                                     //
+///////////////////////////////////////////////////////////////////////////////////
 #include "graphicsclass.h"
 #include "Rendertextureclass.h"
 #include "textureshaderclass.h"
@@ -324,31 +325,28 @@ bool GraphicsClass::Render(float rotation)
 
 	// apply blur in two steps
 	// Horizontal blur
+	auto blurDir = DisplayTexture::EBlurDir_H;
 	bresult = RenderToTexture(m_RenderTexture2, [&,this](){return m_DisplayTexture->Render(m_D3D->GetDeviceContext(), worldMatrix, viewMatrix,
-		projectionMatrix, orthoMatrix, m_TextureShader, m_RenderTexture, true);});
+		projectionMatrix, orthoMatrix, m_TextureShader, m_RenderTexture, blurDir); });
 	if (!bresult)
 	{
 		return false;
 	}
 	// Vertical blur
+	blurDir = DisplayTexture::EBlurDir_V;
 	bresult = RenderToTexture(m_RenderTexture, [&,this](){return m_DisplayTexture->Render(m_D3D->GetDeviceContext(), worldMatrix, viewMatrix,
-		projectionMatrix, orthoMatrix, m_TextureShader, m_RenderTexture2, false);});
+		projectionMatrix, orthoMatrix, m_TextureShader, m_RenderTexture2, blurDir); });
 	if (!bresult)
 	{
 		return false;
 	}
-	//bresult = RenderToTexture(m_RenderTexture2, [&,this](){return m_DisplayTexture->Render(m_D3D->GetDeviceContext(), worldMatrix, viewMatrix,
-	//	projectionMatrix, orthoMatrix, m_TextureShader, m_RenderTexture, false);});
 
 	SetBackBufferRT();
 	m_D3D->BeginScene(0.0f, 1.0f, 0.0f, 1.0f);
+	blurDir = DisplayTexture::EBlurDir_noBlur;
 	m_DisplayTexture->Render(m_D3D->GetDeviceContext(), worldMatrix, viewMatrix,
-		projectionMatrix, orthoMatrix, m_TextureShader, m_RenderTexture, true);
-	// Generate the view matrix based on the camera's position.
-	//if (!RenderScene(rotation)) 
-	//	return false;
-	//RenderScene(0);
-	// Present the rendered scene to the screen.
+		projectionMatrix, orthoMatrix, m_TextureShader, m_RenderTexture, blurDir);
+
 	m_D3D->EndScene();
 
 	return true;

@@ -4,17 +4,18 @@
 // code based on rastertek tutirial 7
 // http://www.rastertek.com/dx11tut07.html
 // 
-/*
-	displaytexure demo https://github.com/alex-leleka/displaytexure 
-	alex leleka (c) 2016
-*/
+///////////////////////////////////////////////////////////////////////////////////
+//	    Displaytexure demo https://github.com/alex-leleka/displaytexure          //
+//																				 //
+//      Alex Leleka (c) 2016                                                     //
+///////////////////////////////////////////////////////////////////////////////////
 #include "systemclass.h"
 
 
 SystemClass::SystemClass()
 {
-	m_Input = 0;
-	m_Graphics = 0;
+	m_Input = nullptr;
+	m_Graphics = nullptr;
 }
 
 
