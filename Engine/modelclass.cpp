@@ -12,7 +12,8 @@ ModelClass::ModelClass() : m_indices(nullptr)
 {
 	m_vertexBuffer = 0;
 	m_indexBuffer = 0;
-	m_Texture = 0;
+	m_TextureDiffuse = 0;
+	m_TextureSpecular = 0;
 	m_model = 0;
 }
 
@@ -87,9 +88,14 @@ int ModelClass::GetIndexCount()
 }
 
 
-ID3D11ShaderResourceView* ModelClass::GetTexture()
+ID3D11ShaderResourceView* ModelClass::GetTextureDiffuse()
 {
-	return m_Texture->GetTexture();
+	return m_TextureDiffuse->GetTexture();
+}
+
+ID3D11ShaderResourceView* ModelClass::GetTextureSpecular()
+{
+	return m_TextureSpecular->GetTexture();
 }
 
 
@@ -124,38 +130,6 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
 		vertices[i].texture = D3DXVECTOR2(m_model[i].tu, m_model[i].tv);
 		vertices[i].normal = D3DXVECTOR3(m_model[i].nx, m_model[i].ny, m_model[i].nz);
 	}
-	/*
-	delete vertices;
-	m_vertexCount = 3;
-	vertices = new VertexType[m_vertexCount];
-	vertices[0].position = D3DXVECTOR3(-1.0,  1.0, - 1.0);
-	vertices[0].texture = D3DXVECTOR2(0.0, 0.0);
-	vertices[0].normal = D3DXVECTOR3(0.0,  0.0, - 1.0);
-	
-	vertices[1].position = D3DXVECTOR3(-1.0,  1.0,  1.0);
-	vertices[1].texture = D3DXVECTOR2(1.0, 0.0);
-	vertices[1].normal = D3DXVECTOR3(0.0, 0.0, 1.0);
-
-	vertices[2].position = D3DXVECTOR3(-1.0, -1.0, 1.0);
-	vertices[2].texture = D3DXVECTOR2(1.0, 1.0);
-	vertices[2].normal = D3DXVECTOR3(0.0, 0.0, 1.0);
-
-	m_indexCount = 3;
-	for (i = 0; i<m_indexCount; i++)
-	{
-		m_indices[i] = i;
-	}
-	*/
-	// Set up the description of the static vertex buffer.
-
-	/*std::ofstream outfile("new.txt", std::ofstream::binary);
-
-	outfile << "indexes ";
-	for (int i = 0; i < m_indexCount; ++i)
-	{
-		outfile << std::to_string( m_indices[i] ) << " ";
-	}
-	outfile.close();*/
 
     vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
     vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_vertexCount;
@@ -252,19 +226,34 @@ void ModelClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
 
 bool ModelClass::LoadTexture(ID3D11Device* device, WCHAR* filename)
 {
+	using std::wstring;
 	bool result;
 
 
-	// Create the texture object.
-	m_Texture = new TextureClass;
-	if(!m_Texture)
+	// Create the diffuse texture object.
+	m_TextureDiffuse = new TextureClass;
+	if(!m_TextureDiffuse)
+	{
+		return false;
+	}
+	wstring diffuseTexurePath = filename + wstring(L"_diffuse.dds");
+	// Initialize the texture object.
+	result = m_TextureDiffuse->Initialize(device, diffuseTexurePath.c_str());
+	if(!result)
 	{
 		return false;
 	}
 
-	// Initialize the texture object.
-	result = m_Texture->Initialize(device, filename);
-	if(!result)
+	// specular texture
+	m_TextureSpecular = new TextureClass;
+	if (!m_TextureSpecular)
+	{
+		return false;
+	}
+	wstring specularTexurePath = filename + wstring(L"_spec.dds");
+
+	result = m_TextureSpecular->Initialize(device, specularTexurePath.c_str());
+	if (!result)
 	{
 		return false;
 	}
@@ -276,11 +265,18 @@ bool ModelClass::LoadTexture(ID3D11Device* device, WCHAR* filename)
 void ModelClass::ReleaseTexture()
 {
 	// Release the texture object.
-	if(m_Texture)
+	if(m_TextureDiffuse)
 	{
-		m_Texture->Shutdown();
-		delete m_Texture;
-		m_Texture = 0;
+		m_TextureDiffuse->Shutdown();
+		delete m_TextureDiffuse;
+		m_TextureDiffuse = 0;
+	}
+
+	if (m_TextureSpecular)
+	{
+		m_TextureSpecular->Shutdown();
+		delete m_TextureSpecular;
+		m_TextureSpecular = 0;
 	}
 
 	return;
@@ -329,60 +325,7 @@ bool ModelClass::LoadModel(char* filename)
 	assert(m_indexCount == indexes.size());
 	for (unsigned i = 0; i < indexes.size(); ++i)
 		m_indices[i] = indexes[i];
-	/*ifstream fin;
-	char input;
-	int i;
 
-
-	// Open the model file.
-	fin.open(filename);
-	
-	// If it could not open the file then exit.
-	if(fin.fail())
-	{
-		return false;
-	}
-
-	// Read up to the value of vertex count.
-	fin.get(input);
-	while(input != ':')
-	{
-		fin.get(input);
-	}
-
-	// Read in the vertex count.
-	fin >> m_vertexCount;
-
-	// Set the number of indices to be the same as the vertex count.
-	m_indexCount = m_vertexCount;
-
-	// Create the model using the vertex count that was read in.
-	m_model = new ModelType[m_vertexCount];
-	if(!m_model)
-	{
-		return false;
-	}
-
-	// Read up to the beginning of the data.
-	fin.get(input);
-	while(input != ':')
-	{
-		fin.get(input);
-	}
-	fin.get(input);
-	fin.get(input);
-
-	// Read in the vertex data.
-	for(i=0; i<m_vertexCount; i++)
-	{
-		fin >> m_model[i].x >> m_model[i].y >> m_model[i].z;
-		fin >> m_model[i].tu >> m_model[i].tv;
-		fin >> m_model[i].nx >> m_model[i].ny >> m_model[i].nz;
-	}
-
-	// Close the model file.
-	fin.close();
-	*/
 	return true;
 }
 

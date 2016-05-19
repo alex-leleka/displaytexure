@@ -76,7 +76,7 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 
 	// Initialize the model object.
 	//result = m_Model->Initialize(m_D3D->GetDevice(), "../Engine/data/cube.txt", L"../Engine/data/seafloor.dds");
-	result = m_Model->Initialize(m_D3D->GetDevice(), "../Engine/data/obj/african_head.obj", L"../Engine/data/obj/african_head_diffuse.dds");
+	result = m_Model->Initialize(m_D3D->GetDevice(), "../Engine/data/obj/african_head.obj", L"../Engine/data/obj/african_head");
 	if(!result)
 	{
 		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
@@ -284,7 +284,8 @@ bool GraphicsClass::RenderScene(float rotation)
 	// Render the model using the light shader.
 
 	result = m_LightShader->Render(m_D3D->GetDeviceContext(), m_Model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
-	                               m_Model->GetTexture(), m_Light->GetDirection(), m_Light->GetDiffuseColor());
+		m_Model->GetTextureDiffuse(), m_Model->GetTextureSpecular(), m_Light->GetDirection(), m_Light->GetDiffuseColor(),
+		m_worldCamera->GetPosition());
 
 	return result;
 }
