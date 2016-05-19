@@ -427,8 +427,6 @@ void D3DClass::BeginScene(float red, float green, float blue, float alpha)
     
 	// Clear the depth buffer.
 	m_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
-
-	return;
 }
 
 
@@ -445,8 +443,6 @@ void D3DClass::EndScene()
 		// Present as fast as possible.
 		m_swapChain->Present(0, 0);
 	}
-
-	return;
 }
 
 
@@ -465,21 +461,18 @@ ID3D11DeviceContext* D3DClass::GetDeviceContext()
 void D3DClass::GetProjectionMatrix(D3DXMATRIX& projectionMatrix)
 {
 	projectionMatrix = m_projectionMatrix;
-	return;
 }
 
 
 void D3DClass::GetWorldMatrix(D3DXMATRIX& worldMatrix)
 {
 	worldMatrix = m_worldMatrix;
-	return;
 }
 
 
 void D3DClass::GetOrthoMatrix(D3DXMATRIX& orthoMatrix)
 {
 	orthoMatrix = m_orthoMatrix;
-	return;
 }
 
 
@@ -487,7 +480,6 @@ void D3DClass::GetVideoCardInfo(char* cardName, int& memory)
 {
 	strcpy_s(cardName, 128, m_videoCardDescription);
 	memory = m_videoCardMemory;
-	return;
 }
 
 ID3D11DepthStencilView* D3DClass::GetDepthStencilView()
@@ -499,6 +491,4 @@ void D3DClass::SetBackBufferRenderTarget()
 {
 	// Bind the render target view and depth stencil buffer to the output render pipeline.
 	m_deviceContext->OMSetRenderTargets(1, &m_renderTargetView, m_depthStencilView);
-
-	return;
 }
