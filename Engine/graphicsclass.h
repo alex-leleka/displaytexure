@@ -46,6 +46,7 @@ public:
 	bool Initialize(int, int, HWND);
 	void Shutdown();
 	bool Frame();
+	void SetShadingModelIndex(size_t);
 private:
 	bool Render(float);
 	bool RenderToTexture(RenderTextureClass *, std::function<bool()> render );

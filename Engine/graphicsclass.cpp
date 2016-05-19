@@ -237,7 +237,10 @@ void GraphicsClass::Shutdown()
 
 	return;
 }
-
+void GraphicsClass::SetShadingModelIndex(size_t index)
+{
+	m_LightShader->SetShadingModelIndex(index);
+}
 
 bool GraphicsClass::Frame()
 {

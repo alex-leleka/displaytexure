@@ -4,7 +4,8 @@
 #include "lightshaderclass.h"
 #include <D3DCompiler.h>
 
-LightShaderClass::LightShaderClass()
+LightShaderClass::LightShaderClass() : 
+	m_shadingModelIndex(0)
 {
 	m_vertexShader = 0;
 	m_pixelShader = 0;
@@ -390,7 +391,7 @@ bool LightShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D
 	dataPtr2->diffuseColor = diffuseColor;
 	dataPtr2->lightDirection = lightDirection;
 	//dataPtr2->padding = 0.0f;
-	dataPtr2->lightingModel = 0;
+	dataPtr2->lightingModel = m_shadingModelIndex;
 
 	// Unlock the constant buffer.
 	deviceContext->Unmap(m_lightBuffer, 0);

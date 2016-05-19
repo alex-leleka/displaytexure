@@ -48,7 +48,7 @@ public:
 	void Shutdown();
 	bool Render(ID3D11DeviceContext*, int, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView* textureDiff,
 		ID3D11ShaderResourceView* textureSpec, D3DXVECTOR3, D3DXVECTOR4, D3DXVECTOR3 eyePos);
-
+	void SetShadingModelIndex(size_t index) { m_shadingModelIndex = index; }
 private:
 	bool InitializeShader(ID3D11Device*, HWND, WCHAR*, WCHAR*);
 	void ShutdownShader();
@@ -65,6 +65,7 @@ private:
 	ID3D11SamplerState* m_sampleState;
 	ID3D11Buffer* m_matrixBuffer;
 	ID3D11Buffer* m_lightBuffer;
+	size_t m_shadingModelIndex;
 };
 
 #endif
