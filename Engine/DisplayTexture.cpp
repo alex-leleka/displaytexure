@@ -16,7 +16,7 @@ DisplayTexture::DisplayTexture() : m_vertexBuffer(nullptr), m_indexBuffer(nullpt
 
 }
 
-bool DisplayTexture::Render(ID3D11DeviceContext* pDeviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, D3DXMATRIX orthoMatrix, TextureShaderClass* pTextureShader, RenderTextureClass* pRenderTexture, int nBlurDirHV)
+bool DisplayTexture::Render(ID3D11DeviceContext* pDeviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, D3DXMATRIX orthoMatrix, TextureShaderClass* pTextureShader, RenderTextureClass* pRenderTexture, int nBlurDirHV)
 {
 	unsigned int stride;
 	unsigned int offset;
@@ -44,7 +44,7 @@ void DisplayTexture::Shutdown()
 	ShutdownBuffers();
 }
 
-bool DisplayTexture::Initialize(ID3D11Device* pDevice, HWND hwnd)
+bool DisplayTexture::Initialize(ID3D11Device* pDevice, int textureWidth, int textureHeight)
 {
 	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
 	D3D11_SUBRESOURCE_DATA vertexData, indexData;
@@ -63,21 +63,11 @@ bool DisplayTexture::Initialize(ID3D11Device* pDevice, HWND hwnd)
 	{
 		return false;
 	}
-
-	// Initialize vertex array to zeros at first.
 	memset(vertices.get(), 0, (sizeof(VertexType) * m_vertexCount));
-
-	// Calculate the screen coordinates of the left side of the bitmap.
-	float left = -400;// (float)((800 / 2) * -1) + (float)0.0;
-
-	// Calculate the screen coordinates of the right side of the bitmap.
-	float right = 400;// left + (float)800;
-
-	// Calculate the screen coordinates of the top of the bitmap.
-	float top = -300;// (float)(600 / 2) - (float)0;
-
-	// Calculate the screen coordinates of the bottom of the bitmap.
-	float bottom = 300;// top - (float)600;
+	float left = -textureWidth / 2.0;
+	float right = textureWidth / 2.0;
+	float top = -textureHeight / 2.0;
+	float bottom = textureHeight / 2.0;
 
 	// Load the vertex array with data.
 	// First triangle.

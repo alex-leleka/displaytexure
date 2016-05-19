@@ -56,15 +56,15 @@ public:
 	void SetShadingModelIndex(size_t);
 	void SetBlurPatternIndex(size_t);
 private:
-	bool Render(float);
+	bool Render();
 	bool RenderToTexture(RenderTextureClass *, std::function<bool()> render );
-	bool RenderScene(float rotation);
+	bool RenderScene();
 	void SetBackBufferRT();
 
 private:
 	D3DClass* m_D3D;
 	CameraClass* m_worldCamera;
-	CameraClass* m_texViewCamera;
+	std::unique_ptr<CameraClass> m_texViewCamera;
 	ModelClass* m_Model;
 	LightShaderClass* m_LightShader;
 	LightClass* m_Light;

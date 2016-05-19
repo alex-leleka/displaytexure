@@ -6,6 +6,9 @@
 #include "engine.h"
 #include "systemclass.h"
 
+#if DEBUG_MEMORY_LEAKS
+#include <vld.h>
+#endif
 
 int RunEngine(TEngineCallbacks & callbacks)
 {
@@ -30,6 +33,6 @@ int RunEngine(TEngineCallbacks & callbacks)
 	// Shutdown and release the system object.
 	pSystem->Shutdown();
 	delete pSystem;
-	pSystem = 0;
+	pSystem = nullptr;
 	return 0;
 }

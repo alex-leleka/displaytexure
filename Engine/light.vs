@@ -69,7 +69,7 @@ PixelInputType LightVertexShader(VertexInputType input)
 		float VdotN = saturate(dot(V, input.normal));
 		float4 matDiffuse = 1;
 		float Pow = 0.9;
-		float4 ambient = float4(0.3, 0.3, 0.3, 1); // it looks very dark without it
+		float4 ambient = float4(0.4, 0.4, 0.4, 1); // it looks very dark without it
 		float4 cDiff = matDiffuse * LdotN * pow(VdotN * LdotN, Pow);
 		output.diff = saturate(cDiff + ambient);
 	}

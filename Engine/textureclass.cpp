@@ -10,7 +10,7 @@
 //      Alex Leleka (c) 2016                                                     //
 ///////////////////////////////////////////////////////////////////////////////////
 #include "textureclass.h"
-
+#include <d3dx11tex.h>
 
 TextureClass::TextureClass()
 {

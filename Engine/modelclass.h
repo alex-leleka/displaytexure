@@ -15,13 +15,14 @@
 //////////////
 #include <d3d11.h>
 #include <d3dx10math.h>
-#include <fstream>
 
 
 ///////////////////////
 // MY CLASS INCLUDES //
 ///////////////////////
 #include "textureclass.h"
+#include <vector>
+#include <memory>
 class Model;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -73,9 +74,9 @@ private:
 	int m_vertexCount, m_indexCount;
 	TextureClass* m_TextureDiffuse;
 	TextureClass* m_TextureSpecular;
-	ModelType* m_model;
-	Model * m_modelObj;
-	unsigned long* m_indices;
+	std::unique_ptr<ModelType[]> m_model;
+	std::unique_ptr<Model> m_modelObj;
+	std::vector<unsigned long>  m_indices;
 };
 
 #endif

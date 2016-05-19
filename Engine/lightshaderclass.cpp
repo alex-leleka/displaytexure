@@ -11,6 +11,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 #include "lightshaderclass.h"
 #include <D3DCompiler.h>
+#include <fstream>
 
 LightShaderClass::LightShaderClass() : 
 	m_shadingModelIndex(0)
@@ -305,7 +306,7 @@ void LightShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND h
 {
 	char* compileErrors;
 	unsigned long bufferSize, i;
-	ofstream fout;
+	std::ofstream fout;
 
 
 	// Get a pointer to the error message text buffer.
@@ -328,12 +329,9 @@ void LightShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND h
 
 	// Release the error message.
 	errorMessage->Release();
-	errorMessage = 0;
 
 	// Pop a message up on the screen to notify the user to check the text file for compile errors.
 	MessageBox(hwnd, L"Error compiling shader.  Check shader-error.txt for message.", shaderFilename, MB_OK);
-
-	return;
 }
 
 

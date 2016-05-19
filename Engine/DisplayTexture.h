@@ -30,9 +30,9 @@ public:
 		EBlurDir_V,
 	};
 	DisplayTexture();
-	bool Render(ID3D11DeviceContext* param1, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, D3DXMATRIX orthoMatrix, TextureShaderClass* pTextureShader, RenderTextureClass* pRenderTexture, int nBlurDirHV);
+	bool Render(ID3D11DeviceContext* , D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, D3DXMATRIX orthoMatrix, TextureShaderClass* pTextureShader, RenderTextureClass* pRenderTexture, int nBlurDirHV);
 	void Shutdown();
-	bool Initialize(ID3D11Device* param1, HWND hwnd);
+	bool Initialize(ID3D11Device* , int textureWidth, int textureHeight);
 
 private:
 	void ShutdownBuffers();

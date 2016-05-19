@@ -46,7 +46,7 @@ enum {
 	IDBC_AUTORADIOBUTTON1BLURTHEELLIPSE,
 };
 //=============================================================================
-int WINAPI WinMain(HINSTANCE hInst,HINSTANCE,LPSTR pStr,int nCmd)
+int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR pStr, int nCmd)
 {
 	ustring classname=_T("MAINWINDOW");
 	WNDCLASSEX wcx={0};  //used for storing information about the wnd 'class'
@@ -65,9 +65,6 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE,LPSTR pStr,int nCmd)
 		ErrMsg(_T("Failed to register wnd class"));
 		return -1;
 	}
-
-	int desktopwidth=GetSystemMetrics(SM_CXSCREEN);
-	int desktopheight=GetSystemMetrics(SM_CYSCREEN);
 
 	int wndPosX = 100, wndPosY = 100; // top left corner
 	int wndWidth = 300, wndHeight = 400;

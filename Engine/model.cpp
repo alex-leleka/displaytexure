@@ -72,7 +72,7 @@ Vec3f Model::vert(int i) {
     return verts_[i];
 }
 
-void Model::load_texture(std::string filename, const char *suffix) {
+void Model::load_texture(std::string filename) {
     std::string texfile(filename);
 }
 

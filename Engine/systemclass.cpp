@@ -185,7 +185,6 @@ LRESULT CALLBACK SystemClass::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam
 void SystemClass::InitializeWindows(int& windowWidth, int& windowHeight)
 {
 	WNDCLASSEX wc;
-	DEVMODE dmScreenSettings;
 	int posX, posY;
 
 
@@ -217,7 +216,7 @@ void SystemClass::InitializeWindows(int& windowWidth, int& windowHeight)
 
 	// Setup the screen settings in windowed mode.
 
-	// If windowed then set it to 800x600 resolution.
+	// set window to 800x600 resolution.
 	windowWidth  = 800;
 	windowHeight = 600;
 

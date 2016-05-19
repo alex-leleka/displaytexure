@@ -15,7 +15,7 @@
 #include "DisplayTexture.h"
 
 
-GraphicsClass::GraphicsClass() : m_TextureShader(0), m_DisplayTexture(0), m_texViewCamera(0)
+GraphicsClass::GraphicsClass() : m_TextureShader(0), m_DisplayTexture(0)
 {
 	m_D3D = 0;
 	m_worldCamera = 0;
@@ -64,8 +64,8 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 		return false;
 	}
 
-	m_texViewCamera = new CameraClass(D3DXVECTOR3(0, -1, 0)); // when you looking at screen "up" is opposite to Y axis
-	if(!m_texViewCamera)
+	m_texViewCamera.reset(new CameraClass(D3DXVECTOR3(0, -1, 0))); // when you looking at screen "up" is opposite to Y axis
+	if(!m_texViewCamera.get())
 	{
 		return false;
 	}
@@ -162,7 +162,7 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 
 	m_DisplayTexture = new DisplayTexture; // TODO: covert to auto ptr
 
-	m_DisplayTexture->Initialize(m_D3D->GetDevice(), hwnd);
+	m_DisplayTexture->Initialize(m_D3D->GetDevice(), screenWidth, screenHeight);
 	if (!result)
 	{
 		MessageBox(hwnd, L"Could not initialize the texture shader object.", L"Error", MB_OK);
@@ -269,7 +269,7 @@ bool GraphicsClass::Frame()
 	}
 	
 	// Render the graphics scene.
-	result = Render(rotation);
+	result = Render();
 	if(!result)
 	{
 		return false;
@@ -279,7 +279,7 @@ bool GraphicsClass::Frame()
 }
 
 
-bool GraphicsClass::RenderScene(float rotation)
+bool GraphicsClass::RenderScene()
 {
 	D3DXMATRIX worldMatrix;
 	D3DXMATRIX viewMatrix;
@@ -306,10 +306,10 @@ bool GraphicsClass::RenderScene(float rotation)
 	return result;
 }
 
-bool GraphicsClass::Render(float rotation)
+bool GraphicsClass::Render()
 {
 	// Render the entire scene to the texture first.
-	bool bresult = RenderToTexture(m_RenderTexture, [this](){return RenderScene(0);});
+	bool bresult = RenderToTexture(m_RenderTexture, [this](){return RenderScene();});
 	if (!bresult)
 	{
 		return false;
@@ -327,7 +327,7 @@ bool GraphicsClass::Render(float rotation)
 	// Horizontal blur
 	auto blurDir = DisplayTexture::EBlurDir_H;
 	bresult = RenderToTexture(m_RenderTexture2, [&,this](){return m_DisplayTexture->Render(m_D3D->GetDeviceContext(), worldMatrix, viewMatrix,
-		projectionMatrix, orthoMatrix, m_TextureShader, m_RenderTexture, blurDir); });
+	                                                                                       orthoMatrix, m_TextureShader, m_RenderTexture, blurDir); });
 	if (!bresult)
 	{
 		return false;
@@ -335,7 +335,7 @@ bool GraphicsClass::Render(float rotation)
 	// Vertical blur
 	blurDir = DisplayTexture::EBlurDir_V;
 	bresult = RenderToTexture(m_RenderTexture, [&,this](){return m_DisplayTexture->Render(m_D3D->GetDeviceContext(), worldMatrix, viewMatrix,
-		projectionMatrix, orthoMatrix, m_TextureShader, m_RenderTexture2, blurDir); });
+	                                                                                      orthoMatrix, m_TextureShader, m_RenderTexture2, blurDir); });
 	if (!bresult)
 	{
 		return false;
@@ -345,7 +345,7 @@ bool GraphicsClass::Render(float rotation)
 	m_D3D->BeginScene(0.0f, 1.0f, 0.0f, 1.0f);
 	blurDir = DisplayTexture::EBlurDir_noBlur;
 	m_DisplayTexture->Render(m_D3D->GetDeviceContext(), worldMatrix, viewMatrix,
-		projectionMatrix, orthoMatrix, m_TextureShader, m_RenderTexture, blurDir);
+	                         orthoMatrix, m_TextureShader, m_RenderTexture, blurDir);
 
 	m_D3D->EndScene();
 

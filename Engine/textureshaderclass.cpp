@@ -13,6 +13,7 @@
 #include "DisplayTexture.h"
 
 #include <D3DCompiler.h>
+#include <d3dx11async.h>
 #include <fstream>
 
 TextureShaderClass::TextureShaderClass() : m_nBlurPatternIndex(0), m_nBlurDirHV(0)
@@ -20,7 +21,8 @@ TextureShaderClass::TextureShaderClass() : m_nBlurPatternIndex(0), m_nBlurDirHV(
 	m_vertexShader = 0;
 	m_pixelShader = 0;
 	m_layout = 0;
-	m_constantBufferPs = m_constantBuffer = 0;
+	m_constantBufferPs = 0;
+	m_constantBuffer = 0;
 	m_sampleState = 0;
 }
 
@@ -371,10 +373,14 @@ bool TextureShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext,
     deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_constantBuffer);
 
 	bufferNumber++;
-	D3DXVECTOR2 vTextureSize(800.0, 600.0);
+	D3DXVECTOR2 vTextureSize(800.0, 600.0); // TODO: get screen size from graphicsclass
 	result = deviceContext->Map(m_constantBufferPs, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResourcePs);
-	psdataPtr = (PsConstantBufferType*)mappedResourcePs.pData;
+	if (FAILED(result))
+	{
+		return false;
+	}
 
+	psdataPtr = (PsConstantBufferType*)mappedResourcePs.pData;
 	psdataPtr->nBlurPatternIndex = m_nBlurPatternIndex;
 
 	if (m_nBlurDirHV == DisplayTexture::EBlurDir_noBlur)

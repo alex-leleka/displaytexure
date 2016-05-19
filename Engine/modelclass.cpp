@@ -16,13 +16,12 @@
 #include <fstream> 
 #include <string> 
 
-ModelClass::ModelClass() : m_indices(nullptr)
+ModelClass::ModelClass()
 {
 	m_vertexBuffer = 0;
 	m_indexBuffer = 0;
 	m_TextureDiffuse = 0;
 	m_TextureSpecular = 0;
-	m_model = 0;
 }
 
 
@@ -109,8 +108,6 @@ ID3D11ShaderResourceView* ModelClass::GetTextureSpecular()
 
 bool ModelClass::InitializeBuffers(ID3D11Device* device)
 {
-	VertexType* vertices;
-	unsigned long* indices;
 	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
     D3D11_SUBRESOURCE_DATA vertexData, indexData;
 	HRESULT result;
@@ -118,20 +115,12 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
 
 
 	// Create the vertex array.
-	vertices = new VertexType[m_vertexCount];
-	if(!vertices)
+	std::unique_ptr<VertexType[]> vertices(new VertexType[m_vertexCount]);
+	if(!vertices.get())
 	{
 		return false;
 	}
 
-	// Create the index array.
-	//indices = new unsigned long[m_indexCount];
-	//if(!indices)
-	//{
-	//	return false;
-	//}
-
-	// Load the vertex array and index array with data.
 	for(i=0; i<m_vertexCount; i++)
 	{
 		vertices[i].position = D3DXVECTOR3(m_model[i].x, m_model[i].y, m_model[i].z);
@@ -147,7 +136,7 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
 	vertexBufferDesc.StructureByteStride = 0;
 
 	// Give the subresource structure a pointer to the vertex data.
-    vertexData.pSysMem = vertices;
+    vertexData.pSysMem = vertices.get();
 	vertexData.SysMemPitch = 0;
 	vertexData.SysMemSlicePitch = 0;
 
@@ -167,7 +156,7 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
 	indexBufferDesc.StructureByteStride = 0;
 
 	// Give the subresource structure a pointer to the index data.
-	indexData.pSysMem = m_indices;
+	indexData.pSysMem = m_indices.data();
 	indexData.SysMemPitch = 0;
 	indexData.SysMemSlicePitch = 0;
 
@@ -177,14 +166,6 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
 	{
 		return false;
 	}
-
-	// Release the arrays now that the vertex and index buffers have been created and loaded.
-	delete [] vertices;
-	vertices = 0;
-
-	//delete [] indices;
-	//indices = 0;
-
 	return true;
 }
 
@@ -214,7 +195,6 @@ void ModelClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
 	unsigned int stride;
 	unsigned int offset;
 
-
 	// Set vertex buffer stride and offset.
 	stride = sizeof(VertexType); 
 	offset = 0;
@@ -227,16 +207,12 @@ void ModelClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
 
     // Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
 	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	return;
 }
 
 
 bool ModelClass::LoadTexture(ID3D11Device* device, WCHAR* filename)
 {
 	using std::wstring;
-	bool result;
-
 
 	// Create the diffuse texture object.
 	m_TextureDiffuse = new TextureClass;
@@ -246,7 +222,7 @@ bool ModelClass::LoadTexture(ID3D11Device* device, WCHAR* filename)
 	}
 	wstring diffuseTexurePath = filename + wstring(L"_diffuse.dds");
 	// Initialize the texture object.
-	result = m_TextureDiffuse->Initialize(device, diffuseTexurePath.c_str());
+	bool result = m_TextureDiffuse->Initialize(device, diffuseTexurePath.c_str());
 	if(!result)
 	{
 		return false;
@@ -265,7 +241,6 @@ bool ModelClass::LoadTexture(ID3D11Device* device, WCHAR* filename)
 	{
 		return false;
 	}
-
 	return true;
 }
 
@@ -277,41 +252,35 @@ void ModelClass::ReleaseTexture()
 	{
 		m_TextureDiffuse->Shutdown();
 		delete m_TextureDiffuse;
-		m_TextureDiffuse = 0;
+		m_TextureDiffuse = nullptr;
 	}
 
 	if (m_TextureSpecular)
 	{
 		m_TextureSpecular->Shutdown();
 		delete m_TextureSpecular;
-		m_TextureSpecular = 0;
+		m_TextureSpecular = nullptr;
 	}
-
-	return;
 }
 
 
 bool ModelClass::LoadModel(char* filename)
 {
-	m_modelObj = new Model(filename);
+	m_modelObj.reset(new Model(filename));
 
 	m_vertexCount = m_modelObj->nverts();
 	m_indexCount = m_modelObj->nfaces() * 3;
-	std::vector<unsigned long> indexes;
-	indexes.reserve(m_indexCount);
+	m_indices.reserve(m_indexCount);
 	// Create the model using the vertex count that was read in.
-	m_model = new ModelType[m_vertexCount];
+	m_model.reset(new ModelType[m_vertexCount]);
 	if (!m_model)
 	{
 		return false;
 	}
 
-	for (int i = 0; i<m_modelObj->nfaces(); i++) {
+	for (int i = 0; i < m_modelObj->nfaces(); i++) {
 		std::vector<int> face = m_modelObj->face(i);
-		Vec3i screen_coords[3];
-		Vec3f world_coords[3];
-		float intensity[3];
-		for (int j = 0; j<3; j++) {
+		for (int j = 0; j < 3; j++) {
 			Vec3f v = m_modelObj->vert(face[j]);
 			// vertex coord
 			m_model[face[j]].x = v.x;
@@ -326,13 +295,11 @@ bool ModelClass::LoadModel(char* filename)
 			auto uv = m_modelObj->uv(i, j);
 			m_model[face[j]].tu = uv.x;
 			m_model[face[j]].tv = -uv.y;
-			indexes.push_back(face[j]);
+
+			m_indices.push_back(face[j]);
 		}
 	}
-	m_indices = new unsigned long[m_indexCount];
-	assert(m_indexCount == indexes.size());
-	for (unsigned i = 0; i < indexes.size(); ++i)
-		m_indices[i] = indexes[i];
+	assert(m_indexCount == m_indices.size());
 
 	return true;
 }
@@ -340,16 +307,7 @@ bool ModelClass::LoadModel(char* filename)
 
 void ModelClass::ReleaseModel()
 {
-	if(m_model)
-	{
-		delete [] m_model;
-		m_model = 0;
-	}
-	if (m_modelObj)
-	{
-		delete m_modelObj;
-		m_modelObj = nullptr;
-	}
+	m_model.reset();
+	m_modelObj.reset();
 
-	return;
 }
