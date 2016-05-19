@@ -40,6 +40,7 @@ struct PixelInputType
 	float2 tex : TEXCOORD0;
 	float3 normal : NORMAL;
 	float3 h : TEXCOORD1;
+	float4 diff : COLOR0;
 };
 
 struct MinnaertPixelInputType
@@ -51,6 +52,8 @@ struct MinnaertPixelInputType
 
 float4 LambertianPixelShader(PixelInputType input);
 float4 BlinnPhongLightPixelShader(PixelInputType input);
+float4 MinnaertLightPixelShader(PixelInputType input);
+float4 ToonLightPixelShader(PixelInputType input);
 ////////////////////////////////////////////////////////////////////////////////
 // Pixel Shader
 ////////////////////////////////////////////////////////////////////////////////
@@ -64,7 +67,7 @@ float4 LightPixelShader(PixelInputType input) : SV_TARGET
 	case 1:
 		return BlinnPhongLightPixelShader(input);
 	case 2:
-		return float4(1, 0, 0, 1);
+		return MinnaertLightPixelShader(input);//ToonLightPixelShader(input);// 
 	default:
 		return float4(1,0,0,1);
 	}
@@ -124,10 +127,11 @@ float4 BlinnPhongLightPixelShader(PixelInputType input)
 	return I;
 }
 
-float4 MinnaertLightPixelShader(MinnaertPixelInputType input)
+float4 MinnaertLightPixelShader(PixelInputType input)
 {
 	// vertex lighting version
 	float4 diff = diffuseTexture.Sample(SampleType, input.tex);
-	float4 color = input.diff * input.diff;
+	float4 color = diff * input.diff;
+	color.a = 1;
 	return color;
 }
