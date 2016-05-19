@@ -85,7 +85,7 @@
     <ClCompile Include="inputclass.cpp" />
     <ClCompile Include="lightclass.cpp" />
     <ClCompile Include="lightshaderclass.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="engine.cpp" />
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="model.cpp" />
     <ClCompile Include="modelclass.cpp" />
@@ -98,6 +98,7 @@
     <ClInclude Include="cameraclass.h" />
     <ClInclude Include="d3dclass.h" />
     <ClInclude Include="DisplayTexture.h" />
+    <ClInclude Include="engine.h" />
     <ClInclude Include="geometry.h" />
     <ClInclude Include="graphicsclass.h" />
     <ClInclude Include="inputclass.h" />

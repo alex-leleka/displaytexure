@@ -30,7 +30,6 @@ public:
 
 private:
 	void ShutdownBuffers();
-
 	ID3D11Buffer *m_vertexBuffer;
 	ID3D11Buffer *m_indexBuffer;
 	unsigned long m_vertexCount;

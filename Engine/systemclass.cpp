@@ -286,10 +286,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
 
 void SystemClass::SetLightingModel(int nModel)
 {
-	throw std::logic_error("The method or operation is not implemented.");
+	m_Graphics->SetShadingModelIndex(nModel);
 }
 
 void SystemClass::SetBlurPattern(int nPattern)
 {
-	throw std::logic_error("The method or operation is not implemented.");
+	m_Graphics->SetBlurPatternIndex(nPattern);
 }

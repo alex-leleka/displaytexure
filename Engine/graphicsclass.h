@@ -53,6 +53,7 @@ public:
 	void Shutdown();
 	bool Frame();
 	void SetShadingModelIndex(size_t);
+	void SetBlurPatternIndex(size_t);
 private:
 	bool Render(float);
 	bool RenderToTexture(RenderTextureClass *, std::function<bool()> render );

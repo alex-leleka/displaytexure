@@ -49,7 +49,6 @@ bool DisplayTexture::Initialize(ID3D11Device* pDevice, HWND hwnd)
 	 	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
 	 	D3D11_SUBRESOURCE_DATA vertexData, indexData;
 	 	HRESULT result;
-	 	int i;
 
 	 	// Set the number of vertices in the vertex array.
 		// Set the number of indices in the index array.
@@ -113,7 +112,7 @@ bool DisplayTexture::Initialize(ID3D11Device* pDevice, HWND hwnd)
 	 	vertices[5].texture = D3DXVECTOR2(1.0f, 1.0f);
 	 
 		 	// Load the index array with data.
-		 	for (i = 0; i<m_indexCount; i++)
+		 	for (size_t i = 0; i<m_indexCount; i++)
 		 	{
 			 		indices[i] = i;
 			 	}

@@ -12,7 +12,7 @@
 #include <D3DCompiler.h>
 #include <fstream>
 
-TextureShaderClass::TextureShaderClass()
+TextureShaderClass::TextureShaderClass(): m_nBlurPatternIndex(0)
 {
 	m_vertexShader = 0;
 	m_pixelShader = 0;
@@ -377,6 +377,7 @@ bool TextureShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext,
 		psdataPtr->dir = D3DXVECTOR4(1, 0, vTextureSize.x, vTextureSize.y); // 10horisontal \ 01vertical blur
 	else
 		psdataPtr->dir = D3DXVECTOR4(0, 1, vTextureSize.x, vTextureSize.y);
+	psdataPtr->nBlurPatternIndex = m_nBlurPatternIndex;
 	deviceContext->Unmap(m_constantBufferPs, 0);
 	deviceContext->PSSetConstantBuffers(bufferNumber, 1, &m_constantBufferPs);
 
@@ -401,6 +402,9 @@ void TextureShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int in
 
 	// Render the triangle.
 	deviceContext->DrawIndexed(indexCount, 0, 0);
+}
 
-	return;
+void TextureShaderClass::SetBlurPatternIndex(size_t index)
+{
+	m_nBlurPatternIndex = index;
 }

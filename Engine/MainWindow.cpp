@@ -22,6 +22,7 @@
 #include <windows.h>  //include all the basics
 #include <tchar.h>    //string and other mapping macros
 #include <string>
+#include "engine.h" // render engine
 
 //define an unicode string type alias
 typedef std::basic_string<TCHAR> ustring;
@@ -103,10 +104,11 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE,LPSTR pStr,int nCmd)
 	return static_cast<int>(msg.wParam);
 }
 
-int WINAPI WinMain1(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline, int iCmdshow);
 //=============================================================================
 LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 {
+	static TEngineCallbacks callbacks = {nullptr, nullptr};
+
 	switch (uMsg)
 	{
 	case WM_CREATE:
@@ -122,13 +124,14 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 			 LRESULT item = SendMessage(hwndComboBox, CB_GETCURSEL, 0, 0); // number of the selected item in combo box
 			 if (item != CB_ERR)
 			 {
-				 MessageBox(NULL, L"Hello World11", L"MessageBox Title", 0);
-				 // callback lighting model
+				 // set lighting model
+				 if (callbacks[eCB_LightingModel])
+					 callbacks[eCB_LightingModel](item);
 			 }
 
 		} else if (wParam == IDBC_PUSHBUTTON_SHOW_RENDWINDOW)
 		{
-			 WinMain1(0, 0,0,0);
+			RunEngine(callbacks);
 		} else if (LOWORD(wParam) == IDCC_DROPDOWNLIST_MODELS)
 		{
 			if(HIWORD(wParam)==CBN_SELCHANGE)

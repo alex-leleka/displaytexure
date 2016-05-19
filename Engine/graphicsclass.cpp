@@ -249,6 +249,11 @@ void GraphicsClass::SetShadingModelIndex(size_t index)
 	m_LightShader->SetShadingModelIndex(index);
 }
 
+void GraphicsClass::SetBlurPatternIndex(size_t index)
+{
+	m_TextureShader->SetBlurPatternIndex(index);
+}
+
 bool GraphicsClass::Frame()
 {
 	bool result;

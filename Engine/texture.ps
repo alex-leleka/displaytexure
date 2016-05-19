@@ -4,6 +4,8 @@
 cbuffer PerFrameBufferPs : register(b1)
 {
 	float4 dirAndTexSize; // xy (direction) zw (texture size)
+	int nBlurPatternIndex;
+	float3 padding;
 };
 
 /////////////
@@ -41,7 +43,7 @@ float patternEllipse(float2 pos)
 	float R = 0.15;
 	float Rsq = R * R;
 	float shift_d = dplusR - R; 
-	// denormalize x and y to get circle
+	// denormalize x and y to get a circle
 	float v = (pos.x - dplusR)*(pos.x - dplusR) + (pos.y - dplusR)*(pos.y - dplusR);
 	if (v  > Rsq)
 		return 0.0;
@@ -52,28 +54,35 @@ float patternEllipse(float2 pos)
 ////////////////////////////////////////////////////////////////////////////////
 float4 TexturePixelShader(PixelInputType input) : SV_TARGET
 {
-	if (patternEllipse(input.tex) == 0.0)
+	[forcecase] switch (nBlurPatternIndex)
+	{
+	case 0:
 		return shaderTexture.Sample(SampleType, input.tex);
+	case 1:
+		if (patternOnliTheRightScreenSide(input.tex) == 0.0)
+			return shaderTexture.Sample(SampleType, input.tex);
+		break;
+	case 2:
+		if (patternEllipse(input.tex) == 0.0)
+			return shaderTexture.Sample(SampleType, input.tex);
+		break;
+	default:
+		return float4(1,0,0,1);
+	}
+	
 	float4 ppColour = shaderTexture.Sample(SampleType, input.tex) * weight[0];
+
+	float hstep = dirAndTexSize.x / dirAndTexSize.z;
+	float vstep = dirAndTexSize.y / dirAndTexSize.w;
+
 	float3 FragmentColor = float3(0.0f, 0.0f, 0.0f);
-
-	//(1.0, 0.0) -> horizontal blur
-	//(0.0, 1.0) -> vertical blur
-
-
-	float2 scr_size = dirAndTexSize.zw;
-
-	float hstep = dirAndTexSize.x / scr_size.x;
-	float vstep = dirAndTexSize.y / scr_size.y;
-
 	for (int i = 1; i < 5; i++) {
 	FragmentColor = FragmentColor +
 		shaderTexture.Sample(SampleType, input.tex + float2(hstep*offset[i], vstep*offset[i]))*weight[i] +
 		shaderTexture.Sample(SampleType, input.tex - float2(hstep*offset[i], vstep*offset[i]))*weight[i];      
 	}
 	ppColour = ppColour + float4(FragmentColor,0.0f);
-	float4 color = ppColour;
-	//return float4(1,0,0,1);
-	return color;
+	//return float4(1,0,0,1); // show the blured pixels in red
+	return ppColour;
 
 }
