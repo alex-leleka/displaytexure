@@ -31,19 +31,20 @@ LRESULT CALLBACK WndProc(HWND,UINT,WPARAM,LPARAM);
 int OnCreate(const HWND,CREATESTRUCT*);
 
 //non-message function declarations
-HWND CreateButton(const HWND,const HINSTANCE,DWORD,const RECT&,const int,
-									const ustring&);
+HWND CreateControl(const HWND,const HINSTANCE,DWORD,const RECT&,const int,
+									const ustring&, const LPWSTR);
+inline UINT AddString(const HWND,const ustring&);
+
 inline int ErrMsg(const ustring&);
 
-//setup some button id's
+//control ids
 enum {
-	IDBC_PUSHBUTTON_1=200,
-	IDBC_PUSHBUTTON_2,
-	IDBC_AUTOCHECKBOX,
-	IDBC_AUTORADIOBUTTON,
-	IDBC_GROUPBOX,
-	IDBC_ICON,
-	IDBC_BITMAP
+	IDBC_PUSHBUTTON_APPLY_OPTIONS=200,
+	IDBC_PUSHBUTTON_SHOW_RENDWINDOW,
+	IDCC_DROPDOWNLIST_MODELS,
+	IDBC_AUTORADIOBUTTON1NOBLUR,
+	IDBC_AUTORADIOBUTTON1BLURRIGHTSIDE,
+	IDBC_AUTORADIOBUTTON1BLURTHEELLIPSE,
 };
 //=============================================================================
 int WINAPI WinMain(HINSTANCE hInst,HINSTANCE,LPSTR pStr,int nCmd)
@@ -114,14 +115,27 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 		PostQuitMessage(0);    //signal end of application
 		return 0;
 	case WM_COMMAND:
-		if(wParam == IDBC_PUSHBUTTON_1)
+		if(wParam == IDBC_PUSHBUTTON_APPLY_OPTIONS)
 		{
-			 MessageBox(NULL, L"Hello World11", L"MessageBox Title", 0);
-		} else if (wParam == IDBC_PUSHBUTTON_2)
+			 
+			 HWND hwndComboBox = GetDlgItem(hwnd, IDCC_DROPDOWNLIST_MODELS); 
+			 LRESULT item = SendMessage(hwndComboBox, CB_GETCURSEL, 0, 0); // number of the selected item in combo box
+			 if (item != CB_ERR)
+			 {
+				 MessageBox(NULL, L"Hello World11", L"MessageBox Title", 0);
+				 // callback lighting model
+			 }
+
+		} else if (wParam == IDBC_PUSHBUTTON_SHOW_RENDWINDOW)
 		{
 			 WinMain1(0, 0,0,0);
-		}
-		return 0;
+		} else if (LOWORD(wParam) == IDCC_DROPDOWNLIST_MODELS)
+		{
+			if(HIWORD(wParam)==CBN_SELCHANGE)
+			{
+				MessageBox(NULL, L"CBN_SELCHANGE", L"MessageBox Title", 0); // lParam - handle of the control
+			}
+		}  
 	default:
 		//let system deal with msg
 		return DefWindowProc(hwnd,uMsg,wParam,lParam);  
@@ -134,22 +148,32 @@ int OnCreate(const HWND hwnd,CREATESTRUCT *cs)
 	//window creation
 	RECT rc={10,10,200,40};
 
+	CreateControl(hwnd,cs->hInstance,BS_PUSHBUTTON,rc,IDBC_PUSHBUTTON_APPLY_OPTIONS,
+		_T("Apply options"), _T("button"));
 
 	rc.top+=50;
-	CreateButton(hwnd,cs->hInstance,BS_PUSHBUTTON,rc,IDBC_PUSHBUTTON_1,
-		_T("PUSH BUTTON1"));
+	CreateControl(hwnd,cs->hInstance,BS_PUSHBUTTON,rc,IDBC_PUSHBUTTON_SHOW_RENDWINDOW,
+		_T("PUSH BUTTON2"), _T("button"));
 
 	rc.top+=50;
-	CreateButton(hwnd,cs->hInstance,BS_PUSHBUTTON,rc,IDBC_PUSHBUTTON_2,
-		_T("PUSH BUTTON2"));
+	rc.bottom = 100;
+	HWND hCombo=CreateControl(hwnd,cs->hInstance,CBS_DROPDOWNLIST	,rc,IDCC_DROPDOWNLIST_MODELS,_T("Lighting model"), _T("combobox"));
+	AddString(hCombo,_T("Lambertian lighting"));
+	AddString(hCombo,_T("Blinn-Phong lighting"));
+	AddString(hCombo,_T("Minnaert vertex lighting"));
+	unsigned nItemIndex = 0;
+	SendMessage(hCombo, CB_SETCURSEL, (WPARAM)nItemIndex, (LPARAM)0); // select first option (this doesn't send SELCHANGE even)
 
-	rc.top+=50;
-	CreateButton(hwnd,cs->hInstance,BS_AUTOCHECKBOX,rc,IDBC_AUTOCHECKBOX,
-		_T("CHECK BOX"));
-
-	rc.top+=50;
-	CreateButton(hwnd,cs->hInstance,BS_AUTORADIOBUTTON,rc,IDBC_AUTOCHECKBOX,
-		_T("RADIO BUTTON"));
+	rc.top+=30;
+	rc.bottom = 30;
+	CreateControl(hwnd,cs->hInstance,BS_AUTORADIOBUTTON,rc,IDBC_AUTORADIOBUTTON1NOBLUR,
+		_T("No blur"), _T("button"));
+	rc.top+=30;
+	CreateControl(hwnd,cs->hInstance,BS_AUTORADIOBUTTON,rc,IDBC_AUTORADIOBUTTON1BLURRIGHTSIDE,
+		_T("Blur right window half"), _T("button"));
+	rc.top+=30;
+	CreateControl(hwnd,cs->hInstance,BS_AUTORADIOBUTTON,rc,IDBC_AUTORADIOBUTTON1BLURTHEELLIPSE,
+		_T("Blur the ellipse in the middle"), _T("button"));
 
 	return 0;
 }
@@ -159,12 +183,12 @@ inline int ErrMsg(const ustring& s)
 	return MessageBox(0,s.c_str(),_T("ERROR"),MB_OK|MB_ICONEXCLAMATION);
 }
 //=============================================================================
-HWND CreateButton(const HWND hParent,const HINSTANCE hInst,DWORD dwStyle,
-									const RECT& rc,const int id,const ustring& caption)
+HWND CreateControl(const HWND hParent,const HINSTANCE hInst,DWORD dwStyle,
+										const RECT& rc,const int id,const ustring& caption, const LPWSTR ctrlClassName)
 {
 	dwStyle|=WS_CHILD|WS_VISIBLE;
 	return CreateWindowEx(0,                            //extended styles
-		_T("button"),                 //control 'class' name
+		ctrlClassName,               //control 'class' name
 		caption.c_str(),              //control caption
 		dwStyle,                      //control style 
 		rc.left,                      //position: left
@@ -176,5 +200,11 @@ HWND CreateButton(const HWND hParent,const HINSTANCE hInst,DWORD dwStyle,
 		reinterpret_cast<HMENU>(static_cast<INT_PTR>(id)),
 		hInst,                        //application instance
 		0);                           //user defined info
+}
+//=============================================================================
+inline UINT AddString(const HWND hCombo,const ustring& s)
+{
+	return static_cast<UINT>(SendMessage(hCombo,CB_ADDSTRING,0,
+		reinterpret_cast<LPARAM>(s.c_str())));
 }
 //=============================================================================

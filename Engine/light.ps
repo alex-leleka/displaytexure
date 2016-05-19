@@ -71,9 +71,6 @@ float4 LightPixelShader(PixelInputType input) : SV_TARGET
 		
 }
 
-//--------------------------------------------------------------------------------------
-// Blinn-Phong Lighting Reflection Model
-//--------------------------------------------------------------------------------------
 float4 calcBlinnPhongLighting(Material M, float4 LColor, float3 N, float3 L, float3 H)
 {
 	// Phong relfection is ambient + light-diffuse + spec highlights.

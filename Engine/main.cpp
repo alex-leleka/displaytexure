@@ -1,40 +1,38 @@
-////////////////////////////////////////////////////////////////////////////////
-// Filename: main.cpp
-////////////////////////////////////////////////////////////////////////////////
-// code based on rastertek tutirial 7
-// http://www.rastertek.com/dx11tut07.html
-// 
 /*
 	displaytexure demo https://github.com/alex-leleka/displaytexure 
 	alex leleka (c) 2016
 */
 #include "systemclass.h"
+#include <functional>
 
 
 int WINAPI WinMain1(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline, int iCmdshow)
 {
-	SystemClass* System;
+	SystemClass* pSystem;
 	bool result;
 	
 	
 	// Create the system object.
-	System = new SystemClass;
-	if(!System)
+	pSystem = new SystemClass;
+	if(!pSystem)
 	{
 		return 0;
 	}
 
 	// Initialize and run the system object.
-	result = System->Initialize();
+	result = pSystem->Initialize();
+
+	std::function<void(int)> callbackLightingModel = [&](int nModel){pSystem->SetLightingModel(nModel);};
+	std::function<void(int)> callbackBlurPattern = [&](int nPattern){pSystem->SetBlurPattern(nPattern);};
 	if(result)
 	{
-		System->Run();
+		pSystem->Run();
 	}
 
 	// Shutdown and release the system object.
-	System->Shutdown();
-	delete System;
-	System = 0;
+	pSystem->Shutdown();
+	delete pSystem;
+	pSystem = 0;
 
 	return 0;
 }
