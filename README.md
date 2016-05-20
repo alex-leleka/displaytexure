@@ -11,3 +11,4 @@
 
 # Download link
 Google Drive: https://goo.gl/7UFN1U
+Requires DirectX SDK
