@@ -16,7 +16,7 @@
 #include <d3dx11async.h>
 #include <fstream>
 
-TextureShaderClass::TextureShaderClass() : m_nBlurPatternIndex(0), m_nBlurDirHV(0)
+TextureShaderClass::TextureShaderClass() : m_nBlurPatternIndex(0), m_nBlurDirHV(0), m_textureSize(0., 0.)
 {
 	m_vertexShader = 0;
 	m_pixelShader = 0;
@@ -37,17 +37,16 @@ TextureShaderClass::~TextureShaderClass()
 }
 
 
-bool TextureShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
+bool TextureShaderClass::Initialize(ID3D11Device* device, HWND hwnd, int screenWidth, int screenHeight)
 {
-	bool result;
-
-
 	// Initialize the vertex and pixel shaders.
-	result = InitializeShader(device, hwnd, L"../Engine/texture.vs", L"../Engine/texture.ps");
+	bool result = InitializeShader(device, hwnd, L"../Engine/texture.vs", L"../Engine/texture.ps");
 	if(!result)
 	{
 		return false;
 	}
+	m_textureSize.x = static_cast<float>(screenWidth);
+	m_textureSize.y = static_cast<float>(screenHeight);
 
 	return true;
 }
@@ -373,7 +372,6 @@ bool TextureShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext,
     deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_constantBuffer);
 
 	bufferNumber++;
-	D3DXVECTOR2 vTextureSize(800.0, 600.0); // TODO: get screen size from graphicsclass
 	result = deviceContext->Map(m_constantBufferPs, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResourcePs);
 	if (FAILED(result))
 	{
@@ -389,9 +387,9 @@ bool TextureShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext,
 		psdataPtr->nBlurPatternIndex = 0;
 	}
 	else if (m_nBlurDirHV == DisplayTexture::EBlurDir_H)
-		psdataPtr->dir = D3DXVECTOR4(1, 0, vTextureSize.x, vTextureSize.y); // 10horisontal blur
+		psdataPtr->dir = D3DXVECTOR4(1, 0, m_textureSize.x, m_textureSize.y); // 10horisontal blur
 	else if (m_nBlurDirHV == DisplayTexture::EBlurDir_V)
-		psdataPtr->dir = D3DXVECTOR4(0, 1, vTextureSize.x, vTextureSize.y); // 01vertical blur
+		psdataPtr->dir = D3DXVECTOR4(0, 1, m_textureSize.x, m_textureSize.y); // 01vertical blur
 
 	deviceContext->Unmap(m_constantBufferPs, 0);
 	deviceContext->PSSetConstantBuffers(bufferNumber, 1, &m_constantBufferPs);

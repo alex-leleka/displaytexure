@@ -44,7 +44,7 @@ public:
 	TextureShaderClass(const TextureShaderClass&);
 	~TextureShaderClass();
 
-	bool Initialize(ID3D11Device*, HWND);
+	bool Initialize(ID3D11Device*, HWND, int screenWidth, int screenHeight);
 	void Shutdown();
 	bool Render(ID3D11DeviceContext*, int, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*);
 	void SetBlurPatternIndex(size_t index);
@@ -66,6 +66,7 @@ private:
 	ID3D11SamplerState* m_sampleState;
 	size_t m_nBlurPatternIndex;
 	int m_nBlurDirHV;
+	D3DXVECTOR2 m_textureSize;
 };
 
 #endif

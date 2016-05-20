@@ -53,7 +53,6 @@ struct MinnaertPixelInputType
 float4 LambertianPixelShader(PixelInputType input);
 float4 BlinnPhongLightPixelShader(PixelInputType input);
 float4 MinnaertLightPixelShader(PixelInputType input);
-float4 ToonLightPixelShader(PixelInputType input);
 ////////////////////////////////////////////////////////////////////////////////
 // Pixel Shader
 ////////////////////////////////////////////////////////////////////////////////
@@ -67,7 +66,7 @@ float4 LightPixelShader(PixelInputType input) : SV_TARGET
 	case 1:
 		return BlinnPhongLightPixelShader(input);
 	case 2:
-		return MinnaertLightPixelShader(input);//ToonLightPixelShader(input);// 
+		return MinnaertLightPixelShader(input);
 	default:
 		return float4(1,0,0,1);
 	}
