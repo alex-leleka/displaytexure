@@ -64,10 +64,10 @@ bool DisplayTexture::Initialize(ID3D11Device* pDevice, int textureWidth, int tex
 		return false;
 	}
 	memset(vertices.get(), 0, (sizeof(VertexType) * m_vertexCount));
-	float left = -textureWidth / 2.0;
-	float right = textureWidth / 2.0;
-	float top = -textureHeight / 2.0;
-	float bottom = textureHeight / 2.0;
+	float left = -textureWidth / 2.0f;
+	float right = textureWidth / 2.0f;
+	float top = -textureHeight / 2.0f;
+	float bottom = textureHeight / 2.0f;
 
 	// Load the vertex array with data.
 	// First triangle.
